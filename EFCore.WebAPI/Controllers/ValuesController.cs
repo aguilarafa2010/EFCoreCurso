@@ -45,6 +45,7 @@ namespace EFCore.WebAPI.Controllers
             var heroi = _context.Herois
                         .Where(h => h.Id == 3 )
                         .FirstOrDefault();
+
             heroi.Nome = "Cap. Caverna";
 
             _context.SaveChanges();
