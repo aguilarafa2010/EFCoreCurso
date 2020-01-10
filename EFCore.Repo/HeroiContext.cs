@@ -21,10 +21,10 @@ namespace EFCore.Repo
         public DbSet<HeroiBatalha> HeroisBatalhas { get; set; }
         public DbSet<IdentidadeSecreta> IdentidadesSecretas { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
             
-        }
+        //}
         //Essa parte explica para o EntityFramework que existem chaves compostas dentro desta classe
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
