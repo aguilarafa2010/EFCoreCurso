@@ -14,19 +14,29 @@ namespace EFCore.WebAPI.Controllers
     [ApiController]
     public class BatalhaController : ControllerBase
     {
-        private readonly HeroiContext _context; 
+        private readonly IEFCoreRepository _repo;
+        #region
+        //private readonly HeroiContext _context; 
 
-        public BatalhaController(HeroiContext context)
-        {
-            _context = context;
-        }
+        //public BatalhaController(HeroiContext context)
+        //{
+        //    _context = context;
+        //}
         // GET: api/Batalha
+        #endregion
+
+        public BatalhaController(IEFCoreRepository repo)
+        {
+            _repo = repo;
+        }
+
         [HttpGet]
-        public ActionResult Get()
+        public async Task<IActionResult > Get()
         {
             try
             {
-                return Ok(new Batalha());
+                var herois = await _repo.GetAllBatalhas(true);
+                return Ok(herois);
             }
             catch (Exception ex)
             {
@@ -37,48 +47,12 @@ namespace EFCore.WebAPI.Controllers
 
         // GET: api/Batalha/5
         [HttpGet("{id}", Name = "GetBatalha")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Batalha
-        [HttpPost]
-        public ActionResult Post(Batalha batalha)
+        public async Task<IActionResult> Get(int id)
         {
             try
             {
-                _context.Batalhas.Add(batalha);
-                _context.SaveChanges();
-                return Ok("BAZINGA");
-            }
-            catch (Exception ex)
-            {
-
-                return BadRequest("Impossível de cadastrar a batalha");
-            }
-
-        }
-
-        // PUT: api/Batalha/5
-        [HttpPut("{id}")]
-        public ActionResult Put(int id, Batalha batalha)
-        {
-
-            try
-            {
-                
-                if (_context.Batalhas.AsNoTracking().FirstOrDefault(h => h.Id == id) != null)
-                {
-                    //Aqui salvou essa batalha dentro das tabelas qu estão na parte EFCore.Dominio atravez do -context, que é responsavel por fazer essa conexão. E salvou essas alterações dentro do SQL utilizando o SaveChanges().
-                    _context.Batalhas.Update(batalha);
-                    _context.SaveChanges();
-                    return Ok("BAZINGA");
-                }
-
-                return Ok("Batalha não Encontrado!");
-
-
+                var herois = await _repo.GetBatalhaById(id, true);
+                return Ok(herois);
             }
             catch (Exception ex)
             {
@@ -87,10 +61,76 @@ namespace EFCore.WebAPI.Controllers
             }
         }
 
+        // POST: api/Batalha
+        [HttpPost]
+        public async Task<IActionResult> Post(Batalha batalha)
+        {
+            try
+            {
+                _repo.Add(batalha);
+                if(await _repo.SaveChangeAsync())
+                    return Ok("BAZINGA");
+                
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest("Impossível de cadastrar a batalha");
+            }
+
+
+            return BadRequest("Não Salvou");
+        }
+
+        // PUT: api/Batalha/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, Batalha batalha)
+        {
+            try
+            {
+                var heroi = await _repo.GetBatalhaById(id);
+
+                if (heroi != null)
+                {
+                    _repo.Update(heroi);
+
+                    if (await _repo.SaveChangeAsync())
+                        return Ok("BAZINGA");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest($"Erro: {ex}");
+            }
+            return BadRequest("Não Deletado");
+        }
+    
+
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+
+            try
+            {
+                var heroi = await _repo.GetBatalhaById(id);
+
+                if (heroi != null)
+                {
+                    _repo.Delete(heroi);
+
+                    if(await _repo.SaveChangeAsync() )
+                        return Ok("BAZINGA");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest($"Erro: {ex}");
+            }
+            return BadRequest("Não Deletado");
         }
     }
 }
